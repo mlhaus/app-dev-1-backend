@@ -1,7 +1,7 @@
 // Application dependencies
 const express = require('express');
 require('dotenv').config();
-const dbConnect = require('./config/db.js');
+const dbConnect = require('../config/db.js');
 dbConnect();
 
 // Application setup
@@ -18,10 +18,10 @@ app.get("/", (request, response) => {
     response.send("Welcome to Marc's API!");
 });
 
-const todosRouter = require("./routes/todos");
+const todosRouter = require("../routes/todos");
 app.use("/api/todos", todosRouter);
 
-const postsRouter = require("./routes/posts");
+const postsRouter = require("../routes/posts");
 app.use("/api/posts", postsRouter);
 
 app.get("/test-err", (req, res) => {
