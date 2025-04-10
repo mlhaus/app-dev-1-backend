@@ -14,9 +14,6 @@ app.use(express.urlencoded({ extended: false }));
 
 // Route definition
 app.use(express.static('public')); // This will display /public/index.html when the server loads
-app.get("/", (request, response) => {
-    response.send("Welcome to Marc's API!");
-});
 
 const todosRouter = require("../routes/todos");
 app.use("/api/todos", todosRouter);
