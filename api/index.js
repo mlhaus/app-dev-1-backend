@@ -1,5 +1,6 @@
 // Application dependencies
 const express = require('express');
+const cors = require('cors');
 require('dotenv').config();
 const dbConnect = require('../config/db.js');
 dbConnect();
@@ -7,6 +8,7 @@ dbConnect();
 // Application setup
 const app = express();
 const port = process.env.PORT || 5000;
+app.use(cors());
 
 // Body parser middleware
 app.use(express.json());
@@ -21,9 +23,6 @@ app.use("/api/todos", todosRouter);
 const postsRouter = require("../routes/posts");
 app.use("/api/posts", postsRouter);
 
-app.get("/test-err", (req, res) => {
-    throw new Error("The sky is falling!");
-})
 app.use("*", fileNotFound);
 app.use(errorHandler);
 // Route handlers
