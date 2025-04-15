@@ -3,8 +3,8 @@ const todosList = document.getElementById('todos');
 
 
 function showTodos() {
-    fetch('http://localhost:5000/api/todos', {
-        // fetch('https://nodejs25.vercel.app/api/todos', {
+    // fetch('http://localhost:5000/api/todos', {
+        fetch('https://nodejs25.vercel.app/api/todos', {
         method: 'GET'
     }).then(res => res.json())
         .then(json => {
@@ -37,8 +37,8 @@ todoForm.addEventListener('submit', function(event) {
     let toDo;
     if(newToDo !== '') {
         toDo = {title: newToDo};
-        fetch('http://localhost:5000/api/todos', {
-        // fetch('https://nodejs25.vercel.app/api/todos', {
+        // fetch('http://localhost:5000/api/todos', {
+        fetch('https://nodejs25.vercel.app/api/todos', {
             method: 'POST',
             body: JSON.stringify(toDo),
             headers: {'Content-Type': 'application/json; charset=UTF-8'}
