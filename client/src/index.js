@@ -111,7 +111,7 @@ function updateListItem(itemName) {
             // Todo: validate the id
             const toDo = {_id: id, title: itemName, userId: 1, completed: false};
             // fetch('http://localhost:5000/api/todos/' + id, {
-            fetch('https://nodejs25.vercel.app/api/todos', {
+            fetch('https://nodejs25.vercel.app/api/todos/' + id, {
                 method: 'PUT',
                 body: JSON.stringify(toDo),
                 headers: {'Content-Type': 'application/json; charset=UTF-8'}
