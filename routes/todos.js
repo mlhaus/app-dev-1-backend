@@ -14,7 +14,7 @@ router.post('/', addTodo);
 router.put('/:id', updateSingleTodo);
 // Delete a single to-do
 router.delete('/:id', deleteSingleTodo);
-
+router.delete('/', deleteAllTodos);
 // Route handlers
 async function getTodos (req, res) {
     try {

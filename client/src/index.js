@@ -63,9 +63,13 @@ function storeListItem(itemName) {
             method: 'POST',
             body: JSON.stringify({title: itemName}),
             headers: {'Content-Type': 'application/json; charset=UTF-8'}
-        }).then(res => res.json())
+        }).then(res => {
+            console.log("1. " + itemName)
+            return res.json();
+        })
             .then(json => {
                 if(json.success) {
+                    console.log("2. " + itemName);
                     createListItem(itemName);
                 }
             });
