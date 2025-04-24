@@ -64,15 +64,15 @@ function storeListItem(itemName) {
             body: JSON.stringify({title: itemName}),
             headers: {'Content-Type': 'application/json; charset=UTF-8'}
         }).then(res => {
-            console.log("1. " + itemName)
             return res.json();
         })
-            .then(json => {
-                if(json.success) {
-                    console.log("2. " + itemName);
-                    createListItem(itemName);
-                }
-            });
+        .then(json => {
+            if(json.success) {
+                // Courtesy of Edward
+                const newTodo = json.data;
+                createListItem([newTodo.title, newTodo._id]);
+            }
+        });
     }
 }
 function setUp() {
