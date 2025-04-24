@@ -2,8 +2,6 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const dbConnect = require('../config/db.js');
-dbConnect();
 
 // Application setup
 const app = express();
@@ -20,8 +18,8 @@ app.use(express.static('public')); // This will display /public/index.html when 
 const todosRouter = require("../routes/todos");
 app.use("/api/todos", todosRouter);
 
-const postsRouter = require("../routes/posts");
-app.use("/api/posts", postsRouter);
+const planetsRouter = require("../routes/planets");
+app.use("/api/planets", planetsRouter);
 
 app.use("*", fileNotFound);
 app.use(errorHandler);
