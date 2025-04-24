@@ -5,6 +5,21 @@
 /*!*************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./src/css/style.css (1) ***!
   \*************************************************************************/
+#spinner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: row; /* row is the default */
+    justify-content: center; /* Horizontal alignment when flex is set to row */
+    align-items: center; /* Verical alignment when flex is set to row */
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 3em;
+}
+
 *,
 *::before,
 *::after {

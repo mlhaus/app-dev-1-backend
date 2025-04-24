@@ -1,10 +1,43 @@
 import './css/style.css';
+
+let apiUrl = '';
+if(location.protocol === 'https:') {
+    apiUrl = 'https://nodejs25.vercel.app/api/todos/';
+} else {
+    apiUrl = 'http://localhost:5000/api/todos/'
+}
+
 const itemForm = document.getElementById('item-form');
 const itemFormBtn = document.querySelector('#item-form button');
 const itemInput = document.getElementById('item-input');
 const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
 const filter = document.getElementById('filter');
+const loadSpinner = document.getElementById('spinner-container');
+
+function showBtnSpinner() {
+    itemFormBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Please wait...';
+}
+
+function hideBtnSpinner() {
+    setTimeout(() => {
+        itemFormBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Todo';
+    }, 800);
+}
+
+function showSpinner() {
+
+}
+
+function hideLoadingSpinner() {
+    setTimeout(() => {
+        loadSpinner.style.opacity = '0'; // This will hide the spinner
+        loadSpinner.style.transition = 'opacity 0.5s'; // Fade out in half of a second
+        setTimeout(() => {
+            loadSpinner.style.display = 'none';
+        }, 500); // 500 milliseconds is 0.5 sec, needed to match the opacity fading
+    }, 1000); // 1000 milliseconds is 1 second, add a short delay so the animation isn't so abrupt
+}
 
 // Start create button functionality
 function createButton(textColor = 'black', iconName = '', ...classes) {
@@ -35,8 +68,7 @@ function createListItem(item) {
 // Start localStorage functionality
 function getItemsFromStorage() {
     let listItemsArr = [];
-    // fetch('http://localhost:5000/api/todos', {
-    fetch('https://nodejs25.vercel.app/api/todos', {
+    fetch(apiUrl, {
         method: 'GET'
     }).then(res => res.json())
         .then(json => {
@@ -53,13 +85,16 @@ function getItemsFromStorage() {
             listItemsArr.forEach(item => {
                 createListItem(item);
             });
+        })
+        .then(function() {
+            hideLoadingSpinner();
+            hideBtnSpinner();
         });
 }
 
 function storeListItem(itemName) {
     if(itemName !== "") {
-        // fetch('http://localhost:5000/api/todos', {
-        fetch('https://nodejs25.vercel.app/api/todos', {
+        fetch(apiUrl, {
             method: 'POST',
             body: JSON.stringify({title: itemName}),
             headers: {'Content-Type': 'application/json; charset=UTF-8'}
@@ -72,6 +107,9 @@ function storeListItem(itemName) {
                 const newTodo = json.data;
                 createListItem([newTodo.title, newTodo._id]);
             }
+        })
+        .then(function() {
+            hideBtnSpinner();
         });
     }
 }
@@ -114,12 +152,13 @@ function updateListItem(itemName) {
             const id = currentItem.getAttribute('data-id');
             // Todo: validate the id
             const toDo = {_id: id, title: itemName, userId: 1, completed: false};
-            // fetch('http://localhost:5000/api/todos/' + id, {
-            fetch('https://nodejs25.vercel.app/api/todos/' + id, {
+            fetch(apiUrl + id, {
                 method: 'PUT',
                 body: JSON.stringify(toDo),
                 headers: {'Content-Type': 'application/json; charset=UTF-8'}
-            }).then(res => res.json())
+            }).then(res => {
+                return res.json();
+            })
                 .then(json => {
                     if(json.success) {
                         currentItem.textContent = "";
@@ -128,6 +167,9 @@ function updateListItem(itemName) {
                         currentItem.appendChild(button);
                         turnOffEdit(currentItem);
                     }
+                })
+                .then(function() {
+                    hideBtnSpinner();
                 });
             break;
         }
@@ -149,6 +191,7 @@ function turnOffEdit(item) {
 window.addEventListener('DOMContentLoaded', setUp);
 itemForm.addEventListener('submit', (event) => {
     event.preventDefault();
+    showBtnSpinner();
     let editMode = inEditMode();
     let inputItemValue = itemInput.value;
     if(inputItemValue !== '') {
