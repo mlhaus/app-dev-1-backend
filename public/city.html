@@ -72,6 +72,12 @@
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    let apiUrl = '';
+    if(location.protocol === 'https:') {
+        apiUrl = 'https://nodejs25.vercel.app/api/todos/';
+    } else {
+        apiUrl = 'http://localhost:5000/api/todos/'
+    }
     const submitBtn = document.getElementById('submitBtn');
     const locationInput = document.getElementById('locationInput');
     const results = document.getElementById('results');
@@ -93,7 +99,7 @@
 
         try {
             // Replace with your Express server endpoint
-            const response = await fetch('http://localhost:5000/api/cityExplorer', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ location: query }),
