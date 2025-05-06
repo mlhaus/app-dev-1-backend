@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location, Weather, and Restaurants</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<!-- Form Section -->
+<div class="w-full max-w-md mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Enter Location</h2>
+    <div class="flex space-x-2">
+        <input
+                id="locationInput"
+                type="text"
+                placeholder="e.g., Golden Gate Bridge"
+                class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+        <button
+                id="submitBtn"
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+        >
+            Search
+        </button>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div id="results" class="w-full max-w-4xl">
+    <!-- Location Heading -->
+    <h1 id="locationName" class="text-3xl font-bold text-gray-800 mb-6 hidden"></h1>
+
+    <div class="grid grid-cols-3 gap-4">
+        <!-- Map -->
+        <div id="mapCard" class="col-span-2">
+            <div id="map" class="h-96"></div>
+        </div>
+
+        <!-- Weather Card -->
+        <div id="weatherCard" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Current Weather</h2>
+            <div class="flex items-center space-x-4 bg-white rounded-lg shadow-lg p-6 mb-6 ">
+                <div>
+                    <p class="text-lg">
+                        <span class="font-semibold">Condition:</span> <span id="weatherDesc"></span>
+                    </p>
+                    <p class="text-lg">
+                        <span class="font-semibold">Temperature:</span> <span id="currentTemp"></span>°F
+                    </p>
+                    <p class="text-lg">
+                        <span class="font-semibold">Feels Like:</span> <span id="feelsLike"></span>°F
+                    </p>
+                    <p class="text-lg">
+                        <span class="font-semibold">Humidity:</span> <span id="humidity"></span>%
+                    </p>
+                    <p class="text-lg">
+                        <span class="font-semibold">Wind:</span> <span id="windSpeed"></span> mph
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restaurants Section -->
+    <div id="restaurantsSection" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Nearby Restaurants</h2>
+        <div id="restaurants" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const submitBtn = document.getElementById('submitBtn');
+    const locationInput = document.getElementById('locationInput');
+    const results = document.getElementById('results');
+    const locationName = document.getElementById('locationName');
+    const mapCard = document.getElementById('mapCard');
+    const weatherCard = document.getElementById('weatherCard');
+    // const weatherIcon = document.getElementById('weatherIcon');
+    const weatherDesc = document.getElementById('weatherDesc');
+    const currentTemp = document.getElementById('currentTemp');
+    const feelsLike = document.getElementById('feelsLike');
+    const humidity = document.getElementById('humidity');
+    const windSpeed = document.getElementById('windSpeed');
+    const restaurantsSection = document.getElementById('restaurantsSection');
+    const restaurants = document.getElementById('restaurants');
+
+    submitBtn.addEventListener('click', async () => {
+        const query = locationInput.value.trim();
+        if (!query) return;
+
+        try {
+            // Replace with your Express server endpoint
+            const response = await fetch('http://localhost:5000/api/cityExplorer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location: query }),
+            });
+            const data = await response.json();
+
+            // Display Location
+            const {lat, lon, display_name} = data.location;
+            const displayName = display_name.split(',');
+            const keepIndexes = new Set([0, displayName.length - 3, displayName.length - 1]);
+            const result = displayName.filter((_, index) => keepIndexes.has(index));
+            locationName.textContent = result.join(',');
+            locationName.classList.remove('hidden');
+
+            // Display Map
+            mapCard.innerHTML = '<div id="map" class="h-96"></div>';
+            const map = L.map('map').setView([37.7749, -122.4194], 10); // Default: San Francisco
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([lat, lon]).addTo(map);
+            map.setView([lat, lon], 14);
+            // mapCard.classList.remove('hidden');
+
+            // Display Weather
+            // weatherIcon.className = `fas ${data.weather.weatherName.toLowerCase() === 'clear' ? 'fa-sun' : 'fa-cloud'} text-4xl text-yellow-500`;
+            weatherDesc.textContent = data.weather.weather;
+            currentTemp.textContent = data.weather.current_temp;
+            feelsLike.textContent = data.weather.feels_like;
+            humidity.textContent = data.weather.humidity;
+            windSpeed.textContent = data.weather.wind_speed;
+            weatherCard.classList.remove('hidden');
+
+            // Display Restaurants
+            restaurants.innerHTML = '';
+            data.restaurants.forEach(restaurant => {
+                const ratingStars = getStarIcons(restaurant.rating);
+                const card = `
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+              <img src="${restaurant.image_url}" alt="${restaurant.name}" class="w-full h-48 object-cover">
+              <div class="p-4">
+                <h3 class="text-lg font-semibold text-gray-800">${restaurant.name}</h3>
+                <div class="flex items-center my-2">${ratingStars}</div>
+                <p class="text-gray-600">${restaurant.price || 'N/A'}</p>
+                <p class="text-gray-600">${restaurant.address}</p>
+                <p class="text-gray-600">${restaurant.city}, ${restaurant.state} ${restaurant.zip}</p>
+                <p class="text-gray-600">${restaurant.phone}</p>
+                <a href="${restaurant.url}" target="_blank" class="text-blue-500 hover:underline">Visit Website</a>
+              </div>
+            </div>
+          `;
+                restaurants.insertAdjacentHTML('beforeend', card);
+            });
+            restaurantsSection.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            results.innerHTML = '<p class="text-red-500">Error fetching data. Please try again.</p>';
+        }
+    });
+
+    function getStarIcons(rating) {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+        let stars = '';
+        for (let i = 0; i < fullStars; i++) {
+            stars += '<i class="fas fa-star text-yellow-500"></i>';
+        }
+        if (halfStar) {
+            stars += '<i class="fas fa-star-half-alt text-yellow-500"></i>';
+        }
+        for (let i = fullStars + halfStar; i < 5; i++) {
+            stars += '<i class="far fa-star text-yellow-500"></i>';
+        }
+        return stars;
+    }
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</body>
+</html>
