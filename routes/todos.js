@@ -69,14 +69,21 @@ async function updateSingleTodo(req, res) {
 
 }
 
-function deleteSingleTodo(req, res) {
-    const todo = todos.find((todo) => todo.id === +req.params.id); // + changes string to int
-    if(!todo) {
-        res.status(404).send("Not Found");
+async function deleteSingleTodo(req, res) {
+    try {
+        const id = req.params.id;
+        if (!isValidId(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid ID format' });
+        }
+        const deletedTodo = await Todos.findByIdAndDelete(id);
+        if (!deletedTodo) {
+            return res.status(404).json({ success: false, message: 'Todo not found' });
+        }
+        return res.json({ success: true, data: deletedTodo });
+    } catch (error) {
+        console.error('Error in deleteSingleTodo:', error);
+        return res.status(500).json({ success: false, message: 'Server error: ' + error.message });
     }
-    const index = todos.indexOf(todo);
-    todos.splice(index, 1);
-    res.json({success: true});
 }
 
 function isValidId(id) {
